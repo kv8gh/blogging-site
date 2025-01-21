@@ -3,26 +3,69 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql" // Replace with your database provider (e.g., mysql, sqlite, etc.)
-  url      = env("DATABASE_URL") // Reads the connection string from the `.env` file
+  provider = "postgresql" // Replace with your database provider
+  url      = env("DATABASE_URL") // Store the connection string in .env
 }
 
+// User Model
 model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  password  String
-  domain    String   @unique
-  blogs     Blog[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String   @id @default(uuid())
+  name          String?
+  email         String   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?  // Optional for OAuth users
+  domain        String   @unique
+  blogs         Blog[]
+
+  accounts      Account[]
+  sessions      Session[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
+// Session Model
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Account Model
+model Account {
+  id                 String  @id @default(uuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String  @unique
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+  user               User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Verification Token Model (Optional for Email Verification)
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Blog Model
 model Blog {
   id        Int      @id @default(autoincrement())
   title     String
   content   String
-  authorId  Int
+  authorId  String
   author    User     @relation(fields: [authorId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

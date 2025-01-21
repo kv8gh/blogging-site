@@ -1,16 +1,43 @@
+'use client';
 
-import MainButton from "@/component/mainButton"
+import { useSession, signIn, signOut } from "next-auth/react";
+import MainButton from "@/component/mainButton";
 
-export default function Page(){
-  return(
-    <main className="min-h-100vh">
+export default function Page() {
+  const { data: session } = useSession(); // Get session data
+
+  return (
+    <main className="min-h-screen">
       <h1>Welcome to my blogging page</h1>
-      <p>This is a sample blog post</p>
-      <MainButton/>
+
+      {session ? (
+        // If user is authenticated
+        <>
+          <p>Welcome back, {session.user?.name || "User"}!</p>
+          <p>Your email: {session.user?.email}</p>
+          <button onClick={() => signOut()} className="btn">
+            Sign Out
+          </button>
+        </>
+      ) : (
+        // If user is not authenticated
+        <>
+          <p>This is a sample blog post</p>
+          <button onClick={() => signIn("google")} className="btn">
+            Sign In with Google
+          </button>
+        </>
+      )}
+
+      <MainButton />
+
       <form>
-        <input type="text" placeholder="Enter your name"/>
+        <input
+          type="text"
+          placeholder="Enter your name"
+          className="input"
+        />
       </form>
     </main>
-    
-  )
+  );
 }
