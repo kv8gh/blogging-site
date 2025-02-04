@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useSession, signIn, signOut } from "next-auth/react";
 import MainButton from "@/component/mainButton";
@@ -23,7 +23,13 @@ export default function Page() {
         // If user is not authenticated
         <>
           <p>This is a sample blog post</p>
-          <button onClick={() => signIn("google")} className="btn">
+          <button
+            onClick={() => {
+              signIn("google");
+              console.log("clicked");
+            }}
+            className="btn p-2 border border-yellow-700 "
+          >
             Sign In with Google
           </button>
         </>
@@ -32,11 +38,7 @@ export default function Page() {
       <MainButton />
 
       <form>
-        <input
-          type="text"
-          placeholder="Enter your name"
-          className="input"
-        />
+        <input type="text" placeholder="Enter your name" className="input" />
       </form>
     </main>
   );

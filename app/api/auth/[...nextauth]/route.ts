@@ -59,9 +59,31 @@ export const authOptions: NextAuthOptions = {
     signIn: "/auth/signin", // Custom sign-in page
   },
   callbacks: {
-    async session({ session, token, user }: { session: Session, token: JWT, user: User }) {
-      session.user = { ...user };
+    async signIn({ user, account, profile, email }) {
+      console.log("User signing in:", user?.email);
+
+      // Handle both Google and credentials users
+      if (account?.provider === "credentials" || account?.provider === "google") {
+        // Optional: Check custom conditions before allowing sign-in
+        console.log('nnnnnnnnnnnnnnnn',account.provider);
+        return true;
+      }
+      return false;
+    },
+    async redirect({ url, baseUrl }) {
+      return url.startsWith(baseUrl) ? url : baseUrl;
+    },
+    async session({ session, token }) {
+      if (token) {
+        session.user = token.user as any;
+      }
       return session;
+    },
+    async jwt({ token, user }) {
+      if (user) {
+        token.user = { id: user.id, email: user.email, name: user.name };
+      }
+      return token;
     },
   },
   session: {
