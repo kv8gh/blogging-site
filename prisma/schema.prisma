@@ -15,9 +15,8 @@ model User {
   emailVerified DateTime?
   image         String?
   password      String?  // Optional for OAuth users
-  domain        String   @unique
+  domain        String?   
   blogs         Blog[]
-
   accounts      Account[]
   sessions      Session[]
 
@@ -40,7 +39,7 @@ model Account {
   userId             String
   type               String
   provider           String
-  providerAccountId  String  @unique
+  providerAccountId  String
   refresh_token      String?
   access_token       String?
   expires_at         Int?
@@ -49,6 +48,9 @@ model Account {
   id_token           String?
   session_state      String?
   user               User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Add compound unique constraint for NextAuth
+  @@unique([provider, providerAccountId])
 }
 
 // Verification Token Model (Optional for Email Verification)
