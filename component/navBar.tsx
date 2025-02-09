@@ -1,4 +1,3 @@
-// components/Navbar.js
 "use client";
 
 import { useSession, signIn, signOut } from "next-auth/react";
@@ -8,26 +7,27 @@ export default function Navbar() {
   const { data: session } = useSession();
 
   return (
-    <nav className="flex items-center justify-between p-4 bg-blue-600 text-white">
-      <div className="text-xl font-bold">My Blogging Page</div>
-      <div className="flex gap-4 items-center">
-        <Link href="/" className="hover:underline">
-          Home
+    <nav className="bg-blue-600 text-white p-4 flex justify-between items-center">
+      <Link href="/">
+        <h1 className="text-xl font-bold cursor-pointer">My Blogging Site</h1>
+      </Link>
+
+      <div className="space-x-4">
+        <Link href="/profile" className="hover:underline">
+          Profile
         </Link>
-        <Link href="/about" className="hover:underline">
-          About
-        </Link>
+
         {session ? (
           <button
             onClick={() => signOut()}
-            className="px-4 py-2 bg-red-500 rounded hover:bg-red-700"
+            className="bg-red-500 hover:bg-red-700 px-4 py-2 rounded text-white"
           >
             Sign Out
           </button>
         ) : (
           <button
             onClick={() => signIn("google")}
-            className="px-4 py-2 bg-green-500 rounded hover:bg-green-700"
+            className="bg-green-500 hover:bg-green-700 px-4 py-2 rounded text-white"
           >
             Sign In
           </button>
@@ -36,5 +36,3 @@ export default function Navbar() {
     </nav>
   );
 }
-
-

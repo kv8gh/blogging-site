@@ -9,7 +9,7 @@ export default function Page() {
   const { data: session } = useSession(); // Get session data
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-400">
       <Navbar />
       <main className="p-4">
         <h1 className="text-2xl font-bold">Welcome to My Blogging Page</h1>
