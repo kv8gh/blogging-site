@@ -1,76 +1,68 @@
 "use client";
 
-import { useSession, signOut } from "next-auth/react";
-import { useEffect, useState } from "react";
-
-interface UserProfile {
-  name: string | null;
-  email: string | null;
-  domain: string | null;
-  blogs: {
-    id: number;
-    title: string;
-    content: string;
-    createdAt: string;
-  }[];
-}
+import { useSession } from "next-auth/react";
+import { useState } from "react";
 
 export default function ProfilePage() {
-  const { data: session } = useSession();
-  const [userData, setUserData] = useState<UserProfile | null>(null);
+  const [domain, setDomain] = useState("");
+  const [message, setMessage] = useState("");
+  const { data: session, status } = useSession();
 
-  useEffect(() => {
-    if (session) {
-      fetch("/api/user/profile")
-        .then((res) => res.json())
-        .then((data) => setUserData(data));
-    }
-  }, [session]);
-
-  if (!session) {
-    return <p>Please sign in to view your profile.</p>;
+  if (status === "loading") {
+    return <p>Loading...</p>; // Show loading state while fetching session
   }
 
+  const handleDomainUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!session?.user?.email) return;
+
+    const response = await fetch("/api/user/domain", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: session.user.email,
+        domain,
+      }),
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      setMessage("Domain updated successfully!");
+    } else {
+      setMessage(data.error || "Failed to update domain.");
+    }
+  };
+
   return (
-    <main className="min-h-screen p-4 bg-gray-400">
-      <h1 className="text-3xl font-bold mb-4">User Profile</h1>
+    <div className="min-h-screen p-8">
+      <h1 className="text-2xl font-bold mb-4">Profile Page</h1>
 
-      {userData ? (
-        <div className="space-y-4">
-          <p>
-            <strong>Name:</strong> {userData.name || "N/A"}
-          </p>
-          <p>
-            <strong>Email:</strong> {userData.email}
-          </p>
-          <p>
-            <strong>Domain:</strong> {userData.domain || "No domain set"}
-          </p>
-          <h2 className="text-2xl font-semibold mt-6">Your Blogs</h2>
-          {userData.blogs.length > 0 ? (
-            userData.blogs.map((blog) => (
-              <div key={blog.id} className="border-b py-2">
-                <h3 className="font-bold">{blog.title}</h3>
-                <p>{blog.content}</p>
-                <small className="text-gray-500">
-                  Created At: {new Date(blog.createdAt).toLocaleString()}
-                </small>
-              </div>
-            ))
-          ) : (
-            <p>No blogs found.</p>
-          )}
-        </div>
+      {session ? (
+        <>
+          <p>Welcome, {session.user?.name || "User"}!</p>
+          <p>Email: {session.user?.email}</p>
+
+          <form onSubmit={handleDomainUpdate} className="mt-4">
+            <input
+              type="text"
+              placeholder="Enter your custom domain"
+              value={domain}
+              onChange={(e) => setDomain(e.target.value)}
+              className="border p-2 mr-2"
+            />
+            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+              Update Domain
+            </button>
+          </form>
+
+          {message && <p className="mt-2 text-green-600">{message}</p>}
+        </>
       ) : (
-        <p>Loading your profile...</p>
+        <p>Please sign in to view your profile.</p>
       )}
-
-      <button
-        onClick={() => signOut()}
-        className="bg-red-500 text-white px-4 py-2 mt-4 rounded"
-      >
-        Sign Out
-      </button>
-    </main>
+    </div>
   );
 }
