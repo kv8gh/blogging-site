@@ -1,33 +1,68 @@
+import { authOptions } from "@/libs/utils/auth";
+import { getServerSession } from "next-auth";
+import prisma from "@/libs/db/connect";
 import { NextResponse } from "next/server";
-import prisma from "@/libs/db/connect"; // Assuming your Prisma client is here
 
-// PATCH request to update the user domain
-export async function PATCH(request: Request) {
+export async function PUT(req: Request) {
   try {
-    const body = await request.json();
-    const { email, domain } = body;
+    const session = await getServerSession(authOptions);
+    if (!session)
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    if (!email || !domain) {
-      return NextResponse.json({ error: "Email and domain are required" }, { status: 400 });
-    }
+    const { domain } = await req.json();
+    if (!domain || domain.length < 3)
+      return NextResponse.json({ error: "Invalid domain" }, { status: 400 });
 
-    // Check if the domain is already taken
-    const existingDomain = await prisma.user.findFirst({
+    const userEmail = session.user?.email as string;
+    // Find the user
+    const user = await prisma.user.findUnique({
+      where: { email: userEmail },
+    });
+
+    // If user already has a domain, prevent changes
+    // if (user?.domain) {
+    //   return NextResponse.json(
+    //     { error: "You cannot change your domain once set" },
+    //     { status: 400 }
+    //   );
+    // }
+
+    // Check if domain is already taken
+    const existingUser = await prisma.user.findFirst({
       where: { domain },
     });
 
-    if (existingDomain) {
-      return NextResponse.json({ error: "Domain already in use" }, { status: 409 });
+    if (existingUser) {
+      return NextResponse.json(
+        { error: "Domain already in use" },
+        { status: 400 }
+      );
     }
 
-    // Update the user's domain
-    const updatedUser = await prisma.user.update({
-      where: { email },
+    // Update user domain
+    await prisma.user.update({
+      where: { email: userEmail },
       data: { domain },
     });
 
-    return NextResponse.json({ message: "Domain updated successfully", user: updatedUser });
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to update domain" }, { status: 500 });
+
+    const isLocalhost = process.env.NODE_ENV === "development";
+  const redirectUrl = isLocalhost
+    ? `http://${domain}.localhost:3000`
+    : `https://${domain}.mysite.com`;
+    // Redirect user to their new domain
+    return NextResponse.json(
+      {
+        message: "Domain registered",
+        redirectUrl,
+      },
+      { status: 200 }
+    );
+  } catch (err) {
+    console.log(err);
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
