@@ -32,7 +32,7 @@ export default function Page() {
         <form className="mt-4">
           <input
             type="text"
-            placeholder="Enter your name"
+            placeholder="Write a blog"
             className="border p-2 w-full rounded-md"
           />
         </form>

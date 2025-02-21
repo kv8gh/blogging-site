@@ -12,6 +12,17 @@ type CustomSession = Session & {
   };
 };
 
+declare module 'next-auth'{
+  interface Session{
+    user: {
+      name: string;
+      email: string;
+      image: string;
+      domain: string | null;
+    }
+  }
+}
+
 
 
 export const authOptions: NextAuthOptions = {

@@ -1,29 +1,67 @@
-import  prisma  from "@/libs/db/connect"
+"use client";
+
+import { useSession } from "next-auth/react";
 import { notFound } from "next/navigation";
+import { useState } from "react";
 
-export default async function UserProfile({ params }: { params: { domain: string } }) {
-  const user = await prisma.user.findFirst({
-    where: { domain: params.domain }, // Find user by domain
-    include: { blogs: true }, // Fetch user's blogs
-  });
+export default function UserProfile({ params }: { params: { domain: string } }) {
+  const { data: session } = useSession(); // Get logged-in user
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
 
-  if (!user) return notFound();
+  const handlePostBlog = async () => {
+    if (!title || !content) return alert("Title and content are required!");
+
+    const response = await fetch("/api/blog/post", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title, content }),
+    });
+
+    if (response.ok) {
+      window.location.reload();
+    } else {
+      alert("Error posting blog");
+    }
+  };
 
   return (
     <main className="min-h-screen p-4">
-      <h1 className="text-3xl font-bold">{user.name}'s Blog</h1>
-      <p className="text-gray-500">Welcome to {user.name}'s blog!</p>
+      <h1 className="text-3xl font-bold">{params.domain}'s Blog</h1>
+      <p className="text-gray-500">Welcome to {params.domain}'s blog!</p>
 
-      {user.blogs.length > 0 ? (
-        user.blogs.map((blog) => (
-          <article key={blog.id} className="mt-4 p-4 border rounded-lg">
-            <h2 className="text-2xl font-semibold">{blog.title}</h2>
-            <p className="text-gray-700">{blog.content}</p>
-          </article>
-        ))
-      ) : (
-        <p>No blogs posted yet.</p>
+      {/* If the logged-in user owns this blog, show the blog posting form */}
+      {session?.user?.domain === params.domain && (
+        <div className="mt-6 p-4 border rounded-lg">
+          <h2 className="text-xl font-semibold">Post a New Blog</h2>
+          <input
+            type="text"
+            placeholder="Blog Title"
+            className="border p-2 w-full mt-2"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+          <textarea
+            placeholder="Blog Content"
+            className="border p-2 w-full mt-2"
+            rows={4}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+          ></textarea>
+          <button
+            onClick={handlePostBlog}
+            className="mt-2 p-2 bg-blue-500 text-white rounded"
+          >
+            Publish Blog
+          </button>
+        </div>
       )}
+
+      {/* Blog Posts */}
+      <div className="mt-6">
+        <h2 className="text-2xl font-semibold">Recent Blogs</h2>
+        {/* Fetch and display blogs here */}
+      </div>
     </main>
   );
 }
