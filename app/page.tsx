@@ -2,8 +2,8 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import Navbar from "@/component/navBar";
-import MainButton from "@/component/mainButton";
+import Navbar from "@/components/navBar";
+import MainButton from "@/components/mainButton";
 
 export default function Page() {
   const { data: session } = useSession(); // Get session data
@@ -12,7 +12,7 @@ export default function Page() {
     <div className="min-h-screen bg-gray-400">
       <Navbar />
       <main className="p-4">
-        <h1 className="text-2xl font-bold">Welcome to My Blogging Page</h1>
+        <h1 className="text-2xl font-bold text-orange-600">Welcome to My Blogging Page</h1>
 
         {session ? (
           // If user is authenticated

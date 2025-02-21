@@ -7,9 +7,9 @@ export default function Navbar() {
   const { data: session } = useSession();
 
   return (
-    <nav className="bg-blue-600 text-white p-4 flex justify-between items-center">
+    <nav className="bg-green-900 text-yellow-600 p-4 flex justify-between items-center">
       <Link href="/">
-        <h1 className="text-xl font-bold cursor-pointer">My Blogging Site</h1>
+        <h1 className="text-xl text-yellow-400 font-bold cursor-pointer">My Blogging Site</h1>
       </Link>
 
       <div className="space-x-4">

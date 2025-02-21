@@ -26,14 +26,14 @@ export default function UserProfile({ params }: { params: { domain: string } }) 
   };
 
   return (
-    <main className="min-h-screen p-4">
+    <main className="min-h-screen p-4 bg-gray-500">
       <h1 className="text-3xl font-bold">{params.domain}'s Blog</h1>
-      <p className="text-gray-500">Welcome to {params.domain}'s blog!</p>
+      <p className="text-black">Welcome to {params.domain}'s blog!</p>
 
       {/* If the logged-in user owns this blog, show the blog posting form */}
       {session?.user?.domain === params.domain && (
         <div className="mt-6 p-4 border rounded-lg">
-          <h2 className="text-xl font-semibold">Post a New Blog</h2>
+          <h2 className="text-xl font-semibold text-black">Post a New Blog</h2>
           <input
             type="text"
             placeholder="Blog Title"
